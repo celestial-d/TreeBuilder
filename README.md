@@ -1,3 +1,3 @@
 # TreeBuilder
 
-Build kernel function tree based on ftrace format
+The repo is used to visulize the kernel function graph of traces captured through ftrace or QEMU.
