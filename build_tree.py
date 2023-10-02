@@ -1,7 +1,12 @@
-#Made by Duo
-#generate dot file
+########################################
+#             Made by Duo              #
+#         generate dot file            #
+########################################
 import pydot
 
+########################################
+#           input                      #
+########################################
 FILE_NAME = 'kernelfunction'
 FILE = FILE_NAME+'.txt'
 # TARGET_KEY = 'task_clear_jobctl_trapping()(0)'
@@ -12,11 +17,16 @@ log_list = []
 log_count_dict = {}
 log_tree = {}
 s_path = []
+#########################################
+#         entry point function          #
+#########################################
 syscall_list = ['do_syscall_fsync()(0)','SyS_fsync()(0)','sys_fdatasync()(0)','sys_fsync()(0)']
 cmd_list = ['CMD35(0)','CMD2a(0)','CMD2a(1)','CMD2a(2)']
 # cmd_list = ['CMD35(0)']
 
-
+#########################################
+#        identify caller-callee         #
+#########################################
 def if_go_deeper(ptr):
 	return True if '{' in ptr else False
 
@@ -26,6 +36,9 @@ def if_go_back(ptr):
 def if_stay(ptr):
 	return True if ';' in ptr else False
 
+##########################################
+#            Draw graph with colors      #
+##########################################
 def draw(parent_name, child_name):
 	if parent_name in syscall_list:
 		node_a = pydot.Node(parent_name, style="filled",fillcolor="green", shape='box', fontsize='9', margin=0, fixedsize=True)
@@ -67,6 +80,9 @@ def draw_s_path(parent_name, child_name):
 # 		edge = pydot.Edge(parent_name, child_name)   
 # 		graph.add_edge(edge)
 
+############################################
+#                generate paths            #
+############################################
 def visit(node, parent=None):
     for k,v in node.items():
         if isinstance(v, dict):
@@ -106,7 +122,9 @@ def build_count_dict(file_name):
 	build_list(file_name)
 	for log in log_list:
 		log_count_dict[log] = 0
-
+##################################################
+#               create the dictionary tree       #
+##################################################
 def build_tree(file_name):
 	tree_raw = open(file_name)
 	depth_list = []
@@ -132,6 +150,9 @@ def build_tree(file_name):
 			log_count_dict[log]+=1
 			current_depth = previous_depth_
 
+##################################################
+#        identify paths with device commands      #
+##################################################
 def suspicious_path(d, k, path=None):
     if path is None:
         path = []
@@ -171,6 +192,9 @@ def node_count(file):
 				count += 1
 	return count
 
+##########################################
+#                 main                   #
+##########################################
 file = FILE
 build_count_dict(file)
 print("count dictionary finished")
@@ -191,6 +215,9 @@ suspicious_path(log_tree, 'scsi_dispatch_cmd()(0)')
 print('Path to scsi_dispatch_cmd(): ', compare_path)
 # print(len(compare_path), 'nodes in suspicious path VS tottotally', node_count(file), 'nodes')
 
+##################################################
+#               generated dot file               #
+##################################################
 
 graph = pydot.Dot(graph_type='digraph',nodesep=.05)
 visit(log_tree)
